@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="am">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>For My Emaney</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Lora:ital,wght@0,400;0,600;1,400&family=Noto+Serif+Ethiopic:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --burgundy: #4a0404;
+      --dark-burgundy: #280202;
+      --gold: #d4af37;
+      --light-gold: #f3e5ab;
+      --parchment: #fdf6e3;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body {
+      background: radial-gradient(circle at center, var(--burgundy) 0%, var(--dark-burgundy) 100%);
+      color: var(--light-gold);
+      font-family: 'Lora', 'Noto Serif Ethiopic', serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .sparkle {
+      position: fixed;
+      width: 6px;
+      height: 6px;
+      background: var(--gold);
+      border-radius: 50%;
+      pointer-events: none;
+      animation: fadeSparkle 0.8s ease-out forwards;
+      box-shadow: 0 0 8px var(--gold);
+      z-index: 9999;
+    }
+    @keyframes fadeSparkle {
+      0% { transform: scale(1) translateY(0); opacity: 1; }
+      100% { transform: scale(0) translateY(-20px); opacity: 0; }
+    }
+
+    /* Envelope Screen */
+    #envelope-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .envelope {
+      width: 280px;
+      height: 190px;
+      background: linear-gradient(135deg, #680909, #3b0303);
+      border: 2px solid var(--gold);
+      border-radius: 10px;
+      position: relative;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
+    .envelope::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 95px;
+      background: linear-gradient(180deg, #7a0c0c, #4a0404);
+      clip-path: polygon(0 0, 50% 100%, 100% 0);
+      border-bottom: 1px solid var(--gold);
+    }
+    .wax-seal {
+      width: 68px;
+      height: 68px;
+      background: radial-gradient(circle, #f3d066, #b8860b);
+      border-radius: 50%;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Cinzel', serif;
+      font-weight: 700;
+      color: var(--dark-burgundy);
+      font-size: 18px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5), inset 0 0 6px #fff3c4;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.07); }
+    }
+    .tap-hint {
+      font-size: 14px;
+      color: var(--gold);
+      letter-spacing: 1px;
+    }
+
+    /* Main Content */
+    #main-content {
+      display: none;
+      width: 100%;
+      max-width: 440px;
+      flex-direction: column;
+      gap: 22px;
+      animation: fadeIn 1s ease forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .header {
+      text-align: center;
+      border-bottom: 1px solid rgba(212, 175, 55, 0.35);
+      padding-bottom: 12px;
+    }
+    .header h1 {
+      font-family: 'Cinzel', serif;
+      color: var(--gold);
+      font-size: 26px;
+      letter-spacing: 1.5px;
+    }
+    .header p {
+      font-size: 13px;
+      font-style: italic;
+      opacity: 0.85;
+      margin-top: 4px;
+    }
+
+    /* Music Player */
+    .player-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      border-radius: 14px;
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .vinyl {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      background: repeating-radial-gradient(#111 0, #111 4px, #292929 5px, #111 6px);
+      border: 2px solid var(--gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .vinyl.spinning { animation: spin 4s linear infinite; }
+    .vinyl::after {
+      content: '';
+      width: 16px;
+      height: 16px;
+      background: var(--burgundy);
+      border: 2px solid var(--gold);
+      border-radius: 50%;
+    }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+    .song-info { flex: 1; }
+    .song-title { font-weight: 600; color: var(--gold); font-size: 15px; }
+    .song-artist { font-size: 12px; opacity: 0.8; }
+    .btn-gold {
+      background: linear-gradient(135deg, #d4af37, #aa7c11);
+      color: var(--dark-burgundy);
+      border: none;
+      padding: 8px 14px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    /* Story & Letter */
+    .letter-card {
+      background: var(--parchment);
+      color: #2b1810;
+      padding: 22px 18px;
+      border-radius: 12px;
+      border: 2px solid var(--gold);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.45);
+      line-height: 1.75;
+      font-size: 15px;
+    }
+    .origin-badge {
+      display: inline-block;
+      background: var(--burgundy);
+      color: var(--gold);
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+      font-style: italic;
+    }
+    .letter-card h3 {
+      color: var(--burgundy);
+      margin-bottom: 8px;
+      font-size: 18px;
+    }
+    .signature {
+      margin-top: 14px;
+      text-align: right;
+      font-weight: 600;
+      color: var(--burgundy);
+    }
+
+    /* Gallery */
+    .gallery-title {
+      text-align: center;
+      font-family: 'Cinzel', serif;
+      color: var(--gold);
+      font-size: 16px;
+    }
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    .photo-slot {
+      aspect-ratio: 1 / 1.15;
+      background: rgba(255,255,255,0.06);
+      border: 1px dashed var(--gold);
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: 11px;
+      color: var(--light-gold);
+      cursor: pointer;
+      overflow: hidden;
+      position: relative;
+    }
+    .photo-slot img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    input[type="file"] { display: none; }
+  </style>
+</head>
+<body>
+
+  <!-- 1. Wax-Sealed Envelope -->
+  <div id="envelope-screen" onclick="openEnvelope()">
+    <div class="envelope">
+      <div class="wax-seal">E & A</div>
+    </div>
+    <p class="tap-hint">✨ ለ emaney የተላከ ልዩ መልእክት — ለመክፈት ንኪው ✨</p>
+  </div>
+
+  <!-- 2. Main Romantic Content -->
+  <div id="main-content">
+    <div class="header">
+      <h1>For My Emaney</h1>
+      <p>From your Amirey, with all my heart</p>
+    </div>
+
+    <!-- Vinyl Player -->
+    <div class="player-card">
+      <div class="vinyl" id="vinyl"></div>
+      <div class="song-info">
+        <div class="song-title">ትምኒተይ (Tmnitey)</div>
+        <div class="song-artist">Abraham Afewerki</div>
+      </div>
+      <button class="btn-gold" id="playBtn" onclick="toggleMusic()">Play</button>
+      <label class="btn-gold" style="background: transparent; border: 1px solid var(--gold); color: var(--gold);">
+        MP3
+        <input type="file" accept="audio/*" onchange="loadCustomAudio(event)">
+      </label>
+    </div>
+    <audio id="bg-audio" loop></audio>
+
+    <!-- Love Letter -->
+    <div class="letter-card">
+      <div class="origin-badge">Instagram: "Are you fine?" ✨</div>
+      <h3>አበበዬ (Emaney)፣</h3>
+      <p>
+        በህይወቴ ውስጥ በመምጣትሽ ሕይወቴን ፍጹም አድርገሽዋል። ከዚያች የመጀመሪያ የኢንስታግራም መልእክት ጀምሮ እስከ ዛሬ ድረስ አንቺ የእኔ የሕይወት ትርጉም ነሽ። ፊትሽን ሳየው ሰላም ይሰማኛል፣ ድምፅሽን ስሰማ ደግሞ ልቤ በፍቅር ትመታለች።
+      </p>
+      <p style="margin-top: 10px;">
+        ያለ አንቺ ሕይወቴን መገመት አልችልም። ሁሌም ከጎኔ እንድትሆኚ እና የወደፊት ሕይወታችንን አብረን እንድንገነባ እመኛለሁ።
+      </p>
+      <div class="signature">ለዘላለም አፍቃሪሽ፣<br>Amirey ❤️</div>
+    </div>
+
+    <!-- Memories Gallery -->
+    <div class="gallery-title">Our Memories</div>
+    <div class="gallery">
+      <label class="photo-slot" id="slot1">
+        <span>+ ፎቶ 1</span>
+        <input type="file" accept="image/*" onchange="previewImg(event, 'slot1')">
+      </label>
+      <label class="photo-slot" id="slot2">
+        <span>+ ፎቶ 2</span>
+        <input type="file" accept="image/*" onchange="previewImg(event, 'slot2')">
+      </label>
+      <label class="photo-slot" id="slot3">
+        <span>+ ፎቶ 3</span>
+        <input type="file" accept="image/*" onchange="previewImg(event, 'slot3')">
+      </label>
+    </div>
+  </div>
+
+  <script>
+    // Initialize Telegram Mini App
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+    tg.setHeaderColor('#280202');
+    tg.setBackgroundColor('#280202');
+
+    // Touch sparkle effect
+    document.addEventListener('touchstart', (e) => {
+      const touch = e.touches[0];
+      createSparkle(touch.clientX, touch.clientY);
+    });
+    document.addEventListener('click', (e) => {
+      createSparkle(e.clientX, e.clientY);
+    });
+    function createSparkle(x, y) {
+      const s = document.createElement('div');
+      s.className = 'sparkle';
+      s.style.left = x + 'px';
+      s.style.top = y + 'px';
+      document.body.appendChild(s);
+      setTimeout(() => s.remove(), 800);
+    }
+
+    // Soft built-in romantic melody fallback using Web Audio API
+    let audioCtx, isPlaying = false, melodyInterval;
+    const customAudio = document.getElementById('bg-audio');
+    let hasCustomAudio = false;
+
+    function playGentleChime() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const notes = [261.63, 329.63, 392.00, 493.88, 523.25, 392.00];
+      let step = 0;
+      melodyInterval = setInterval(() => {
+        if (!isPlaying || hasCustomAudio) return;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = notes[step % notes.length];
+        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 1.4);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 1.4);
+        step++;
+      }, 900);
+    }
+
+    function openEnvelope() {
+      if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+      document.getElementById('envelope-screen').style.display = 'none';
+      document.getElementById('main-content').style.display = 'flex';
+      startMusic();
+    }
+
+    function startMusic() {
+      isPlaying = true;
+      document.getElementById('vinyl').classList.add('spinning');
+      document.getElementById('playBtn').innerText = 'Pause';
+      if (hasCustomAudio) {
+        customAudio.play();
+      } else {
+        playGentleChime();
+      }
+    }
+
+    function toggleMusic() {
+      if (isPlaying) {
+        isPlaying = false;
+        document.getElementById('vinyl').classList.remove('spinning');
+        document.getElementById('playBtn').innerText = 'Play';
+        if (hasCustomAudio) customAudio.pause();
+        clearInterval(melodyInterval);
+      } else {
+        startMusic();
+      }
+    }
+
+    function loadCustomAudio(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      hasCustomAudio = true;
+      clearInterval(melodyInterval);
+      customAudio.src = URL.createObjectURL(file);
+      startMusic();
+    }
+
+    function previewImg(event, slotId) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const slot = document.getElementById(slotId);
+        slot.innerHTML = `<img src="${e.target.result}" alt="Memory">`;
+      };
+      reader.readAsDataURL(file);
+    }
+  </script>
+</body>
+</html>
